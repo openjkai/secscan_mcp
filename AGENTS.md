@@ -19,4 +19,4 @@ Python MCP server wrapping security scanners (`gitleaks`, `semgrep`, `osv-scanne
 
 ## Current phase
 
-Infrastructure complete. Next: `normalize.py` (Finding schema), then engine adapters per PLAN.md.
+Core implementation done: `normalize.py`, engine adapters, `runner.py`, MCP `server.py`. Optional external CLIs (gitleaks, semgrep, etc.) enhance coverage when installed. Next: integration tests with fixtures, Cursor `mcp.json` verification.

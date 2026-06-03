@@ -2,7 +2,7 @@
 
 MCP server that scans codebases for security issues: hardcoded secrets, SAST findings, vulnerable dependencies, and IaC misconfigurations. See [PLAN.md](PLAN.md) for the full design.
 
-**Status:** Infrastructure and scaffolding only — scanner implementation is in progress.
+**Status:** Core MCP server implemented. Custom regex scanner works without external tools; install optional CLIs for broader coverage.
 
 ## Requirements
 
@@ -44,17 +44,33 @@ docs/                # Contributor docs
 PLAN.md              # Implementation plan
 ```
 
-## Cursor MCP config (after package is implemented)
+## Optional scanner CLIs
+
+| Tool | Category | Install (example) |
+|------|----------|-------------------|
+| gitleaks | secrets | `brew install gitleaks` |
+| semgrep | SAST | `pip install semgrep` |
+| bandit | SAST (Python) | `pip install bandit` |
+| osv-scanner | dependencies | `brew install osv-scanner` |
+| checkov | IaC | `pip install checkov` |
+
+The **custom** engine always runs (built-in YAML rules).
+
+## Cursor MCP config
+
+Add to `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "secscan": {
-      "command": "/path/to/mcp_test/.venv/bin/secscan-mcp"
+      "command": "/Users/gohchenkai/Documents/mcp_test/.venv/bin/secscan-mcp"
     }
   }
 }
 ```
+
+Restart Cursor, then use tools like `scan_all` or `list_available_scanners`.
 
 ## Contributing
 

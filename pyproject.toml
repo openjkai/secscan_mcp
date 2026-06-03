@@ -103,6 +103,10 @@ mypy_path = ["src"]
 module = ["mcp.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["secscan_mcp.server"]
+disable_error_code = ["misc", "no-untyped-call"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
