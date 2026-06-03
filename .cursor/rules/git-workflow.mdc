@@ -1,0 +1,22 @@
+---
+description: Branching and PR workflow for secscan-mcp
+alwaysApply: true
+---
+
+# Git workflow
+
+- Default branch: `main`
+- Prefer feature branches off `main`: `feat/gitleaks-adapter`, `fix/path-validation` (avoid committing large changes directly on `main` when collaborating)
+- Keep PRs small and aligned with [PLAN.md](../../PLAN.md) todos
+- Run `make check` before opening a PR
+- PRs: use `gh pr create` when user asks; include Summary + Test plan
+
+## What not to commit
+
+- Virtualenv (`.venv/`)
+- Tool caches (`.ruff_cache`, `.mypy_cache`, `.pytest_cache`)
+- Generated scan reports with real project data unless sanitized fixtures in `tests/fixtures/`
+
+## Hooks
+
+Pre-commit enforces: trailing whitespace, YAML/TOML/JSON checks, private key detection, ruff, ruff-format, mypy on `src/`.

@@ -1,0 +1,24 @@
+---
+description: secscan-mcp project context and implementation order
+alwaysApply: true
+---
+
+# secscan-mcp
+
+Python MCP server: orchestrate security scanners, normalize findings for agents.
+
+- Design: [PLAN.md](../../PLAN.md)
+- Package: `src/secscan_mcp/`
+- Agent guide: [AGENTS.md](../../AGENTS.md)
+
+## Build order
+
+1. `normalize.py` — Finding schema, severity, dedupe, secret redaction
+2. `engines/*` — one adapter per scanner CLI
+3. `runner.py` — parallel runs, timeouts, path safety
+4. `server.py` — MCP tools (`scan_secrets`, `scan_code`, `scan_all`, etc.)
+5. `tests/` — fixtures + integration markers
+
+## Quality gate
+
+Before marking work done: `make check` (ruff + mypy + pytest).

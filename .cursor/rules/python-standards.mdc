@@ -1,0 +1,30 @@
+---
+description: Python style and patterns for secscan-mcp
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python standards
+
+- Python 3.11+; type-annotate all public APIs; mypy strict passes on `src/`
+- Line length 100; Ruff format + lint (`make format`, `make lint`)
+- Use `pathlib.Path` for filesystem paths; validate and resolve scan targets
+- Never log or return full secret values — redact in normalized findings
+- Engine adapters: `is_installed() -> bool`, `run(path) -> list[Finding]`, parse JSON/stdout defensively
+- Subprocess: timeouts, capture stderr on failure, no shell=True
+- Prefer stdlib + existing deps (`mcp`, `pyyaml`); avoid new deps without reason
+
+```python
+# ✅ subprocess with timeout
+proc = subprocess.run(
+    cmd,
+    cwd=root,
+    capture_output=True,
+    text=True,
+    timeout=timeout_s,
+    check=False,
+)
+
+# ❌ never echo raw secrets
+finding.code_snippet = redact_secret(raw_line)
+```

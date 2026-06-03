@@ -1,0 +1,37 @@
+---
+description: Git commit safety — only commit when the user asks
+alwaysApply: true
+---
+
+# Git commits
+
+## When to commit
+
+- **Only** create a git commit when the user explicitly asks
+- If unclear, ask first — do not commit proactively
+
+## Safety
+
+- NEVER update git config
+- NEVER run destructive git commands (`push --force`, `hard reset`, etc.) unless explicitly requested
+- NEVER skip hooks (`--no-verify`) unless explicitly requested
+- NEVER force-push to `main`/`master` — warn the user if they request it
+- Avoid `git commit --amend` unless all apply: user requested amend, HEAD commit is yours this session, not pushed
+- Do not commit: `.env`, `*.pem`, `*.key`, `credentials.json`, `.scan-output/`, real secrets in fixtures
+
+## Commit workflow (when user asks)
+
+1. Parallel: `git status`, `git diff`, `git log` (recent messages for style)
+2. Draft a 1–2 sentence message focused on **why**
+3. Stage relevant files, commit with HEREDOC message, verify with `git status`
+4. Do not push unless the user asks
+
+## Message format
+
+```
+Short imperative summary (50 chars or less if possible)
+
+Optional body: why this change matters.
+```
+
+Example: `Add gitleaks adapter with normalized secret findings`
