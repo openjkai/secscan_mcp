@@ -1,8 +1,17 @@
-.PHONY: help install install-dev sync lint format typecheck test test-integration check build release release-patch release-minor release-major pre-commit clean
+.PHONY: help check-python install install-dev sync lint format typecheck test test-integration check build release release-patch release-minor release-major pre-commit clean
 
-PYTHON ?= python3
+# Prefer Python 3.11+ (project requires >=3.11)
+FIND_PYTHON := $(shell for c in python3.13 python3.12 python3.11; do \
+	if $$c -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null; then echo $$c; break; fi; done)
+PYTHON ?= $(or $(FIND_PYTHON),python3)
 VENV ?= .venv
 BIN = $(VENV)/bin
+
+check-python:
+	@$(PYTHON) -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null || \
+	  (printf '\nerror: Python 3.11+ required (found: '; $(PYTHON) --version; \
+	   printf '). Install on Ubuntu:\n  sudo apt install python3.11 python3.11-venv\n  make install-dev PYTHON=python3.11\n\n'); \
+	  exit 1
 
 help:
 	@echo "Targets:"
@@ -20,19 +29,19 @@ help:
 	@echo "  pre-commit   Run all pre-commit hooks"
 	@echo "  clean        Remove caches and build artifacts"
 
-$(VENV)/bin/activate:
+$(VENV)/bin/activate: check-python
 	$(PYTHON) -m venv $(VENV)
 	$(BIN)/pip install -U pip
 
 install: $(VENV)/bin/activate
 	$(BIN)/pip install -e .
 
-install-dev: $(VENV)/bin/activate
+install-dev: check-python $(VENV)/bin/activate
 	$(BIN)/pip install -e ".[dev]"
 	$(BIN)/pre-commit install
 	@echo "Dev environment ready. Activate: source $(VENV)/bin/activate"
 
-sync: $(VENV)/bin/activate
+sync: check-python $(VENV)/bin/activate
 	$(BIN)/pip install -e ".[dev]"
 
 lint:
