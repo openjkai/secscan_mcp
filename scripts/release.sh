@@ -84,6 +84,32 @@ current_version() {
   grep -E '^__version__ = ' "$VERSION_FILE" | sed -E 's/^__version__ = ["'\'']([^"'\'']+)["'\'']/\1/'
 }
 
+detect_python() {
+  if [[ -n "${PYTHON:-}" ]]; then
+    printf '%s' "$PYTHON"
+    return
+  fi
+  local candidate
+  for candidate in python3.13 python3.12 python3.11; do
+    if command -v "$candidate" >/dev/null 2>&1 \
+      && "$candidate" -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null; then
+      printf '%s' "$candidate"
+      return
+    fi
+  done
+  die "Python 3.11+ not found — install python3.11 or set PYTHON=python3.11"
+}
+
+ensure_dev_env() {
+  PYTHON="$(detect_python)"
+  export PYTHON
+  log "using ${PYTHON} ($(${PYTHON} --version))"
+  if [[ ! -x "$ROOT/.venv/bin/ruff" ]]; then
+    log "dev tools missing — running make sync"
+    run make -C "$ROOT" sync PYTHON="$PYTHON"
+  fi
+}
+
 next_version() {
   local cur bump major minor patch
   cur="$(normalize_version "$1")"
@@ -183,7 +209,7 @@ preflight() {
       while IFS= read -r line; do
         [[ -z "$line" ]] && continue
         local file=${line:3}
-        if [[ "$file" != "CHANGELOG.md" ]]; then
+        if [[ "$file" != "CHANGELOG.md" && "$file" != "src/secscan_mcp/__init__.py" ]]; then
           allowed=0
           break
         fi
@@ -206,10 +232,11 @@ bump_version_file() {
 }
 
 quality_gate() {
+  ensure_dev_env
   log "make check"
-  run make -C "$ROOT" check
+  run make -C "$ROOT" check PYTHON="$PYTHON"
   log "make build"
-  run make -C "$ROOT" build
+  run make -C "$ROOT" build PYTHON="$PYTHON"
 }
 
 git_release() {

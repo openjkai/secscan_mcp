@@ -66,16 +66,16 @@ build: $(VENV)/bin/activate
 
 release:
 	@test -n "$(VERSION)$(BUMP)" || (echo "Usage: make release BUMP=patch|minor|major  OR  make release VERSION=x.y.z" && exit 1)
-	@./scripts/release.sh $(if $(DRY_RUN),--dry-run,) $(if $(YES),--yes,) $(or $(BUMP),$(VERSION))
+	@PYTHON="$(PYTHON)" ./scripts/release.sh $(if $(DRY_RUN),--dry-run,) $(if $(YES),--yes,) $(or $(BUMP),$(VERSION))
 
 release-patch:
-	@$(MAKE) release BUMP=patch $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
+	@$(MAKE) release BUMP=patch PYTHON="$(PYTHON)" $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
 
 release-minor:
-	@$(MAKE) release BUMP=minor $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
+	@$(MAKE) release BUMP=minor PYTHON="$(PYTHON)" $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
 
 release-major:
-	@$(MAKE) release BUMP=major $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
+	@$(MAKE) release BUMP=major PYTHON="$(PYTHON)" $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
 
 check: lint typecheck test
 
