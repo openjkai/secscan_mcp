@@ -175,8 +175,21 @@ preflight() {
     log "version already $VERSION in $VERSION_FILE (will re-release if tag absent)"
   fi
 
-  if [[ "$DRY_RUN" -eq 0 ]] && [[ -n "$(git -C "$ROOT" status --porcelain)" ]]; then
-    die "working tree not clean — commit or stash changes first"
+  if [[ "$DRY_RUN" -eq 0 ]]; then
+    local dirty
+    dirty="$(git -C "$ROOT" status --porcelain)"
+    if [[ -n "$dirty" ]]; then
+      local allowed=1
+      while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        local file=${line:3}
+        if [[ "$file" != "CHANGELOG.md" ]]; then
+          allowed=0
+          break
+        fi
+      done <<<"$dirty"
+      [[ "$allowed" -eq 1 ]] || die "working tree not clean — commit or stash changes first"
+    fi
   fi
 
   if git -C "$ROOT" rev-parse "v${VERSION}" >/dev/null 2>&1; then
@@ -206,6 +219,9 @@ git_release() {
 
   log "commit version bump"
   run git -C "$ROOT" add "$VERSION_FILE"
+  if [[ -n "$(git -C "$ROOT" status --porcelain CHANGELOG.md 2>/dev/null)" ]]; then
+    run git -C "$ROOT" add "$CHANGELOG"
+  fi
   run git -C "$ROOT" commit -m "Release ${tag}"
 
   log "create tag ${tag}"
