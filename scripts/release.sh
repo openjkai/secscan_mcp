@@ -22,6 +22,7 @@ else
 fi
 
 STEP=0
+TOTAL_STEPS=6
 
 usage() {
   cat <<'EOF'
@@ -72,7 +73,7 @@ die() { fail "$*"; exit 1; }
 
 step() {
   STEP=$((STEP + 1))
-  printf '\n%s[%s/%s] %s%s\n' "$BOLD" "$STEP" "$1" "$2" "$NC"
+  printf '\n%s[%s/%s] %s%s\n' "$BOLD" "$STEP" "$TOTAL_STEPS" "$1" "$NC"
 }
 
 run() {
@@ -125,7 +126,7 @@ ensure_dev_env() {
   log "using ${PYTHON} ($(${PYTHON} --version))"
   if [[ ! -x "$ROOT/.venv/bin/ruff" ]]; then
     log "dev tools missing — running make sync"
-    run make -C "$ROOT" sync PYTHON="$PYTHON"
+    run make -C "$ROOT" -s sync PYTHON="$PYTHON"
   fi
 }
 
@@ -254,22 +255,30 @@ git_release() {
   local branch
   branch="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)"
 
-  log "commit version bump"
   run git -C "$ROOT" add "$VERSION_FILE"
   if [[ -n "$(git -C "$ROOT" status --porcelain CHANGELOG.md 2>/dev/null)" ]]; then
     run git -C "$ROOT" add "$CHANGELOG"
   fi
-  run git -C "$ROOT" commit -m "Release ${tag}"
 
-  log "create tag ${tag}"
-  run git -C "$ROOT" tag -a "$tag" -m "Release ${tag}"
-
-  if ! confirm "Push ${branch} and ${tag} to origin?"; then
-    die "aborted before push — local commit and tag were created"
+  if [[ -n "$(git -C "$ROOT" status --porcelain)" ]]; then
+    log "commit release changes ..."
+    run git -C "$ROOT" commit -m "Release ${tag}"
+    ok "committed"
+  else
+    ok "version ${VERSION} already committed — skipping commit"
   fi
 
-  log "git push origin ${branch} ${tag}"
+  log "create tag ${tag} ..."
+  run git -C "$ROOT" tag -a "$tag" -m "Release ${tag}"
+  ok "tagged ${tag}"
+
+  if ! confirm "Push ${branch} and ${tag} to origin?"; then
+    die "aborted before push — tag ${tag} exists locally only"
+  fi
+
+  log "git push origin ${branch} ${tag} ..."
   run git -C "$ROOT" push origin "$branch" "$tag"
+  ok "pushed to origin"
 }
 
 github_release() {
@@ -306,7 +315,7 @@ main() {
 
   printf '\n%ssecscan-mcp release%s\n' "$BOLD" "$NC"
 
-  step "1" "Preflight checks"
+  step "Preflight checks"
   preflight
   ok "changelog, git, and gh ready"
 
@@ -316,30 +325,30 @@ main() {
     die "release cancelled"
   fi
 
-  step "2" "Set version"
+  step "Set version"
   bump_version_file
   ok "version → ${VERSION}"
 
-  step "3" "Prepare dev environment"
+  step "Prepare dev environment"
   ensure_dev_env
   ok "using ${PYTHON}"
 
-  step "4" "Quality checks & build"
+  step "Quality checks & build"
   log "make check ..."
-  if ! run make -C "$ROOT" check PYTHON="$PYTHON"; then
+  if ! run make -C "$ROOT" -s check PYTHON="$PYTHON"; then
     die "make check failed — fix errors above, then retry"
   fi
   ok "lint, typecheck, and tests passed"
   log "make build ..."
-  if ! run make -C "$ROOT" build PYTHON="$PYTHON"; then
+  if ! run make -C "$ROOT" -s build PYTHON="$PYTHON"; then
     die "make build failed — fix errors above, then retry"
   fi
   ok "package built (dist/)"
 
-  step "5" "Git tag & push"
+  step "Git tag & push"
   git_release
 
-  step "6" "GitHub Release (triggers PyPI)"
+  step "GitHub Release (triggers PyPI)"
   github_release
 
   printf '\n%s✓ Release v%s complete%s\n' "$GREEN" "$VERSION" "$NC"
