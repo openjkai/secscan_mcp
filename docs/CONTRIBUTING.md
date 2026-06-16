@@ -15,7 +15,8 @@
 | `make lint` | Ruff check |
 | `make format` | Ruff format + auto-fix |
 | `make typecheck` | Mypy |
-| `make test` | Pytest |
+| `make test` | Pytest (unit tests; integration skipped when CLIs missing) |
+| `make test-integration` | Pytest with `-m integration` (requires optional CLIs) |
 | `make pre-commit` | Run all pre-commit hooks |
 
 ## Before you commit

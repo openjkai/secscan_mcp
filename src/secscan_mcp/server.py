@@ -37,7 +37,11 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="scan_secrets",
-            description="Scan a directory for hardcoded secrets and credentials.",
+            description=(
+                "Scan a directory for hardcoded secrets and credentials. "
+                "Set include_git_history to also scan past git commits for secrets "
+                "removed from the working tree (built-in git_history engine; gitleaks when installed)."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -48,7 +52,10 @@ async def list_tools() -> list[Tool]:
                     "include_git_history": {
                         "type": "boolean",
                         "default": False,
-                        "description": "Include git history (gitleaks only)",
+                        "description": (
+                            "Scan git commit history for secrets (not just current files). "
+                            "Uses built-in git_history when git is available; also enables gitleaks history mode."
+                        ),
                     },
                     "severity_threshold": {
                         "type": "string",

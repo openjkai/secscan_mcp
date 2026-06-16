@@ -6,6 +6,7 @@ from secscan_mcp.engines.bandit import BanditEngine
 from secscan_mcp.engines.base import Engine
 from secscan_mcp.engines.checkov import CheckovEngine
 from secscan_mcp.engines.custom import CustomSecretsEngine
+from secscan_mcp.engines.git_history import GitHistoryEngine
 from secscan_mcp.engines.gitleaks import GitleaksEngine
 from secscan_mcp.engines.osv import OsvEngine
 from secscan_mcp.engines.semgrep import SemgrepEngine
@@ -13,6 +14,7 @@ from secscan_mcp.normalize import Category
 
 SECRET_ENGINES: list[Engine] = [
     CustomSecretsEngine(),
+    GitHistoryEngine(),
     GitleaksEngine(),
 ]
 

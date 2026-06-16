@@ -6,6 +6,7 @@ from secscan_mcp.runner import list_scanners, scan_secrets
 def test_list_scanners_includes_custom() -> None:
     names = {s.name for s in list_scanners()}
     assert "custom" in names
+    assert "git_history" in names
 
 
 def test_scan_secrets_custom_only(tmp_path: object) -> None:

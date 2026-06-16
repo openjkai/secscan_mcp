@@ -45,6 +45,9 @@ typecheck:
 test:
 	$(BIN)/pytest
 
+test-integration:
+	$(BIN)/pytest -m integration
+
 check: lint typecheck test
 
 pre-commit:

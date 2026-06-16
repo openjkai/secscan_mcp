@@ -53,7 +53,7 @@ Minimal config (works in Cursor, Claude Desktop, Windsurf):
 | Tool | Purpose |
 |------|---------|
 | `list_available_scanners` | Which engines are installed on this machine |
-| `scan_secrets` | Hardcoded credentials and secrets |
+| `scan_secrets` | Hardcoded credentials and secrets (optionally scan git commit history) |
 | `scan_code` | SAST (semgrep, bandit) |
 | `scan_dependencies` | Vulnerable packages (osv-scanner) |
 | `scan_iac` | IaC misconfigurations (checkov) |
@@ -61,6 +61,8 @@ Minimal config (works in Cursor, Claude Desktop, Windsurf):
 | `explain_finding` | Remediation hints for a `rule_id` |
 
 Most scan tools accept `path` (directory to scan) and optional `severity_threshold` (`critical`, `high`, `medium`, `low`, `info`).
+
+`scan_secrets` also accepts `include_git_history` (boolean). When `true`, scans past git commits for secrets removed from the working tree but still present in history — no extra tools required beyond `git`.
 
 ## Optional scanners
 
@@ -79,7 +81,7 @@ After installing, run `list_available_scanners` again to confirm.
 ## Example prompts
 
 - *"Call `list_available_scanners` and tell me what's installed."*
-- *"Run `scan_secrets` on this project."*
+- *"Run `scan_secrets` with include_git_history on this repo — check if any secrets were ever committed."*
 - *"Run `scan_all` with severity_threshold high and summarize the findings."*
 - *"Explain the rule `internal-api-key`."*
 
@@ -91,6 +93,7 @@ Environment variables (optional):
 |----------|---------|-------------|
 | `SECSCAN_DEFAULT_TIMEOUT_SECONDS` | `300` | Per-engine scan timeout |
 | `SECSCAN_MAX_FINDINGS` | `500` | Max findings per report |
+| `SECSCAN_GIT_MAX_COMMITS` | `500` | Max commits scanned in git history mode |
 
 Pass via MCP config `env` block — see [setup guide](docs/setup.md#environment-variables).
 

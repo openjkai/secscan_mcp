@@ -296,5 +296,6 @@ Expected: at minimum the **custom** secrets engine runs without any optional CLI
 
 - *"Call `list_available_scanners` and tell me what's installed."*
 - *"Run `scan_secrets` on this project."*
+- *"Run `scan_secrets` with include_git_history — check if secrets were ever committed."*
 - *"Run `scan_all` with severity_threshold high and summarize the findings."*
 - *"Explain the rule `internal-api-key`."*

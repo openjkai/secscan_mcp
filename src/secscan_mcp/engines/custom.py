@@ -2,12 +2,7 @@
 
 from __future__ import annotations
 
-import re
-from importlib import resources
 from pathlib import Path
-from typing import Any
-
-import yaml
 
 from secscan_mcp.normalize import (
     Category,
@@ -17,8 +12,19 @@ from secscan_mcp.normalize import (
     map_severity,
     redact_snippet,
 )
+from secscan_mcp.rules.loader import load_secret_rules
 
-_RULES_PATH = "custom_secrets.yaml"
+_SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "venv",
+    "node_modules",
+    "__pycache__",
+    ".ruff_cache",
+    ".mypy_cache",
+    "dist",
+    "build",
+}
 
 
 class CustomSecretsEngine:
@@ -30,7 +36,7 @@ class CustomSecretsEngine:
 
     def run(self, root: Path, *, timeout: int) -> list[Finding]:
         del timeout  # unused; scan is in-process
-        rules = _load_rules()
+        rules = load_secret_rules()
         findings: list[Finding] = []
         for file_path in _iter_text_files(root):
             try:
@@ -39,7 +45,7 @@ class CustomSecretsEngine:
                 continue
             rel = str(file_path.relative_to(root))
             for rule in rules:
-                pattern: re.Pattern[str] = rule["pattern"]
+                pattern = rule["pattern"]
                 for match in pattern.finditer(content):
                     line = content[: match.start()].count("\n") + 1
                     snippet = redact_snippet(match.group(0))
@@ -69,35 +75,6 @@ class CustomSecretsEngine:
                         )
                     )
         return findings
-
-
-def _load_rules() -> list[dict[str, Any]]:
-    rules_file = resources.files("secscan_mcp.rules").joinpath(_RULES_PATH)
-    raw = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
-    if not isinstance(raw, dict):
-        return []
-    rules = raw.get("rules", [])
-    loaded: list[dict[str, Any]] = []
-    for rule in rules:
-        if not isinstance(rule, dict) or "pattern" not in rule:
-            continue
-        entry = dict(rule)
-        entry["pattern"] = re.compile(str(rule["pattern"]))
-        loaded.append(entry)
-    return loaded
-
-
-_SKIP_DIRS = {
-    ".git",
-    ".venv",
-    "venv",
-    "node_modules",
-    "__pycache__",
-    ".ruff_cache",
-    ".mypy_cache",
-    "dist",
-    "build",
-}
 
 
 def _iter_text_files(root: Path) -> list[Path]:

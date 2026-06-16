@@ -10,6 +10,7 @@ from pathlib import Path
 
 from secscan_mcp.engines import ALL_ENGINES, ENGINES_BY_CATEGORY
 from secscan_mcp.engines.base import Engine
+from secscan_mcp.engines.git_history import GitHistoryEngine
 from secscan_mcp.engines.gitleaks import GitleaksEngine
 from secscan_mcp.normalize import Category, Finding, ScanReport, Severity, build_report
 from secscan_mcp.paths import resolve_scan_path
@@ -38,7 +39,7 @@ def _run_engine(
     if not engine.is_installed():
         return engine.name, [], None
     try:
-        if isinstance(engine, GitleaksEngine):
+        if isinstance(engine, (GitleaksEngine, GitHistoryEngine)):
             include_history = bool(kwargs.get("include_git_history", False))
             findings = engine.run(root, timeout=timeout, include_git_history=include_history)
         else:
@@ -60,6 +61,8 @@ def _run_engines(
     engines_skipped = [e.name for e in engines if not e.is_installed()]
     errors: list[str] = []
     to_run = [e for e in engines if e.is_installed()]
+    if not bool(kwargs.get("include_git_history", False)):
+        to_run = [e for e in to_run if e.name != "git_history"]
 
     if not to_run:
         return findings, engines_run, engines_skipped, errors
