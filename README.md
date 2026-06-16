@@ -1,5 +1,7 @@
 # secscan-mcp
 
+[![CI](https://github.com/openjkai/secscan_mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/openjkai/secscan_mcp/actions/workflows/ci.yml)
+
 A portable **MCP server** for security scanning — works with **any AI coding assistant** that supports the [Model Context Protocol](https://modelcontextprotocol.io): Cursor, VS Code, Claude Desktop, Windsurf, Zed, Continue, and more.
 
 Scan codebases for **hardcoded secrets**, **SAST issues**, **vulnerable dependencies**, and **IaC misconfigurations** — one install, one normalized report format.

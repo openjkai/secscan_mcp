@@ -52,7 +52,7 @@ Goal: any developer can install and configure in their IDE in under 2 minutes.
 - [x] Multi-IDE setup guide ([docs/setup.md](docs/setup.md))
 - [x] Example MCP configs per host (`docs/examples/`)
 - [x] Fix placeholder URLs in `pyproject.toml`
-- [ ] CI workflow (lint, typecheck, test on push)
+- [x] CI workflow (lint, typecheck, test on push)
 - [ ] Integration tests with `@pytest.mark.integration` marker
 
 ### Phase 2 — PyPI publish

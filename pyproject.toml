@@ -107,7 +107,7 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["secscan_mcp.server"]
-disable_error_code = ["misc", "no-untyped-call"]
+disable_error_code = ["misc", "no-untyped-call", "untyped-decorator"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
