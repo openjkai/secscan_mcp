@@ -1,4 +1,4 @@
-.PHONY: help install install-dev sync lint format typecheck test test-integration check build pre-commit clean
+.PHONY: help install install-dev sync lint format typecheck test test-integration check build release release-patch release-minor release-major pre-commit clean
 
 PYTHON ?= python3
 VENV ?= .venv
@@ -15,6 +15,7 @@ help:
 	@echo "  test         Pytest"
 	@echo "  test-integration  Pytest optional CLI tests"
 	@echo "  build        Build sdist + wheel (dist/)"
+	@echo "  release      Run scripts/release.sh (BUMP=patch|minor|major or VERSION=x.y.z)"
 	@echo "  check        lint + typecheck + test"
 	@echo "  pre-commit   Run all pre-commit hooks"
 	@echo "  clean        Remove caches and build artifacts"
@@ -53,6 +54,19 @@ test-integration:
 build: $(VENV)/bin/activate
 	$(BIN)/pip install -q build
 	$(BIN)/python -m build
+
+release:
+	@test -n "$(VERSION)$(BUMP)" || (echo "Usage: make release BUMP=patch|minor|major  OR  make release VERSION=x.y.z" && exit 1)
+	@./scripts/release.sh $(if $(DRY_RUN),--dry-run,) $(if $(YES),--yes,) $(or $(BUMP),$(VERSION))
+
+release-patch:
+	@$(MAKE) release BUMP=patch $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
+
+release-minor:
+	@$(MAKE) release BUMP=minor $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
+
+release-major:
+	@$(MAKE) release BUMP=major $(if $(DRY_RUN),DRY_RUN=$(DRY_RUN),) $(if $(YES),YES=$(YES),)
 
 check: lint typecheck test
 

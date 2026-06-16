@@ -18,6 +18,7 @@
 | `make test` | Pytest (unit tests; integration skipped when CLIs missing) |
 | `make test-integration` | Pytest with `-m integration` (requires optional CLIs) |
 | `make build` | Build sdist + wheel to `dist/` |
+| `make release VERSION=x.y.z` | Release script — tag, push, GitHub Release → PyPI |
 | `make pre-commit` | Run all pre-commit hooks |
 
 ## Before you commit

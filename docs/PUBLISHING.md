@@ -17,6 +17,32 @@ Trusted publishing uses OIDC — no long-lived `PYPI_API_TOKEN` in GitHub secret
 
 ## Release checklist
 
+1. Add a `## [X.Y.Z] - YYYY-MM-DD` section to [CHANGELOG.md](../CHANGELOG.md).
+2. Run the release script:
+
+   ```bash
+   # Auto next version (recommended)
+   make release-patch          # 0.1.0 → 0.1.1
+   make release-minor          # 0.1.0 → 0.2.0
+   make release-major          # 0.1.0 → 1.0.0
+
+   # Or explicit / generic bump
+   make release BUMP=patch
+   ./scripts/release.sh minor
+   make release VERSION=0.1.1
+
+   # Preview
+   make release-patch DRY_RUN=1
+   ```
+
+   The script will:
+   - Bump `src/secscan_mcp/__init__.py`
+   - Run `make check` and `make build`
+   - Commit, tag `vX.Y.Z`, push to origin
+   - Create a GitHub Release (notes from CHANGELOG → triggers PyPI publish)
+
+### Manual checklist (if not using the script)
+
 1. Update version in `src/secscan_mcp/__init__.py` (single source of truth via hatch).
 2. Add a section to [CHANGELOG.md](../CHANGELOG.md).
 3. Run locally:
