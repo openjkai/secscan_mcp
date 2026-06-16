@@ -2,16 +2,16 @@
 
 # Prefer Python 3.11+ (project requires >=3.11)
 FIND_PYTHON := $(shell for c in python3.13 python3.12 python3.11; do \
-	if $$c -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null; then echo $$c; break; fi; done)
+	if $$c -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' 2>/dev/null; then echo $$c; break; fi; done)
 PYTHON ?= $(or $(FIND_PYTHON),python3)
 VENV ?= .venv
 BIN = $(VENV)/bin
 
 check-python:
-	@$(PYTHON) -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null || \
-	  (printf '\nerror: Python 3.11+ required (found: '; $(PYTHON) --version; \
-	   printf '). Install on Ubuntu:\n  sudo apt install python3.11 python3.11-venv\n  make install-dev PYTHON=python3.11\n\n'); \
-	  exit 1
+	@$(PYTHON) -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' || \
+	  (printf '\n✗ Python 3.11+ required (found: '; $(PYTHON) --version 2>&1; \
+	   printf ')\n  Fix: sudo apt install python3.11 python3.11-venv\n        make install-dev PYTHON=python3.11\n\n'; \
+	   exit 1)
 
 help:
 	@echo "Targets:"

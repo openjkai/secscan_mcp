@@ -11,6 +11,18 @@ ASSUME_YES=0
 VERSION=""
 BUMP_KIND=""
 
+if [[ -t 1 ]]; then
+  BOLD=$'\033[1m'
+  GREEN=$'\033[0;32m'
+  RED=$'\033[0;31m'
+  CYAN=$'\033[0;36m'
+  NC=$'\033[0m'
+else
+  BOLD="" GREEN="" RED="" CYAN="" NC=""
+fi
+
+STEP=0
+
 usage() {
   cat <<'EOF'
 Usage: scripts/release.sh [options] VERSION | BUMP
@@ -53,8 +65,15 @@ Prerequisites:
 EOF
 }
 
-log() { printf '→ %s\n' "$*"; }
-die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+log() { printf '  %s→%s %s\n' "$CYAN" "$NC" "$*"; }
+ok() { printf '  %s✓%s %s\n' "$GREEN" "$NC" "$*"; }
+fail() { printf '  %s✗%s %s\n' "$RED" "$NC" "$*" >&2; }
+die() { fail "$*"; exit 1; }
+
+step() {
+  STEP=$((STEP + 1))
+  printf '\n%s[%s/%s] %s%s\n' "$BOLD" "$STEP" "$1" "$2" "$NC"
+}
 
 run() {
   if [[ "$DRY_RUN" -eq 1 ]]; then
@@ -224,19 +243,10 @@ preflight() {
 }
 
 bump_version_file() {
-  log "set version → $VERSION"
   if [[ "$DRY_RUN" -eq 1 ]]; then
     return
   fi
   sed -i "s/^__version__ = .*/__version__ = \"${VERSION}\"/" "$VERSION_FILE"
-}
-
-quality_gate() {
-  ensure_dev_env
-  log "make check"
-  run make -C "$ROOT" check PYTHON="$PYTHON"
-  log "make build"
-  run make -C "$ROOT" build PYTHON="$PYTHON"
 }
 
 git_release() {
@@ -293,18 +303,47 @@ github_release() {
 main() {
   parse_args "$@"
   cd "$ROOT"
-  preflight
 
-  log "release secscan-mcp v${VERSION} (current: $(current_version))"
+  printf '\n%ssecscan-mcp release%s\n' "$BOLD" "$NC"
+
+  step "1" "Preflight checks"
+  preflight
+  ok "changelog, git, and gh ready"
+
+  log "target v${VERSION} (current $(current_version))"
 
   if ! confirm "Proceed with release v${VERSION}?"; then
-    die "aborted"
+    die "release cancelled"
   fi
 
+  step "2" "Set version"
   bump_version_file
-  quality_gate
+  ok "version → ${VERSION}"
+
+  step "3" "Prepare dev environment"
+  ensure_dev_env
+  ok "using ${PYTHON}"
+
+  step "4" "Quality checks & build"
+  log "make check ..."
+  if ! run make -C "$ROOT" check PYTHON="$PYTHON"; then
+    die "make check failed — fix errors above, then retry"
+  fi
+  ok "lint, typecheck, and tests passed"
+  log "make build ..."
+  if ! run make -C "$ROOT" build PYTHON="$PYTHON"; then
+    die "make build failed — fix errors above, then retry"
+  fi
+  ok "package built (dist/)"
+
+  step "5" "Git tag & push"
   git_release
+
+  step "6" "GitHub Release (triggers PyPI)"
   github_release
+
+  printf '\n%s✓ Release v%s complete%s\n' "$GREEN" "$VERSION" "$NC"
+  log "track PyPI: gh run list --workflow=release.yml"
 }
 
 main "$@"
