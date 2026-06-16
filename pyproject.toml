@@ -41,8 +41,10 @@ dev = [
 secscan-mcp = "secscan_mcp.server:main"
 
 [project.urls]
-Documentation = "https://github.com/your-org/secscan-mcp#readme"
-Repository = "https://github.com/your-org/secscan-mcp"
+Homepage = "https://github.com/openjkai/secscan_mcp"
+Documentation = "https://github.com/openjkai/secscan_mcp#readme"
+Repository = "https://github.com/openjkai/secscan_mcp"
+Issues = "https://github.com/openjkai/secscan_mcp/issues"
 
 [tool.hatch.build]
 dev-mode-dirs = ["src"]

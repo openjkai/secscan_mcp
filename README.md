@@ -1,57 +1,50 @@
 # secscan-mcp
 
-MCP server for Cursor that scans codebases for security issues: hardcoded secrets, SAST, vulnerable dependencies, and IaC misconfigurations.
+A portable **MCP server** for security scanning — works with **any AI coding assistant** that supports the [Model Context Protocol](https://modelcontextprotocol.io): Cursor, VS Code, Claude Desktop, Windsurf, Zed, Continue, and more.
 
-The built-in **custom** scanner works with no extra tools. Install optional CLIs ([below](#optional-scanners)) for broader coverage.
+Scan codebases for **hardcoded secrets**, **SAST issues**, **vulnerable dependencies**, and **IaC misconfigurations** — one install, one normalized report format.
 
-## Install
+The built-in **custom** scanner works with no extra tools. Install optional CLIs for broader coverage ([below](#optional-scanners)).
 
-Requires **Python 3.11+**.
+## Quick start
 
-```bash
-git clone <repository-url>
-cd mcp_test
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install .
-```
-
-Confirm the command exists:
+**1. Install** (Python 3.11+):
 
 ```bash
-which secscan-mcp
+pip install git+https://github.com/openjkai/secscan_mcp.git
 ```
 
-## Use in Cursor
+Or from a local clone:
 
-### Option 1 — Any project (recommended)
+```bash
+git clone https://github.com/openjkai/secscan_mcp.git
+cd secscan_mcp && pip install .
+```
 
-Add to **`~/.cursor/mcp.json`** (create the file if needed):
+**2. Add to your IDE** — pick your client:
+
+| IDE / client | Config file | Guide |
+|--------------|-------------|-------|
+| Cursor | `~/.cursor/mcp.json` | [setup →](docs/setup.md#cursor) |
+| VS Code | `.vscode/mcp.json` | [setup →](docs/setup.md#vs-code-github-copilot) |
+| Claude Desktop | OS-specific (see guide) | [setup →](docs/setup.md#claude-desktop) |
+| Claude Code | `~/.claude/settings.json` | [setup →](docs/setup.md#claude-code) |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` | [setup →](docs/setup.md#windsurf) |
+| Others | — | [Full setup guide](docs/setup.md) |
+
+Minimal config (works in Cursor, Claude Desktop, Windsurf):
 
 ```json
 {
   "mcpServers": {
     "secscan": {
-      "command": "/absolute/path/to/secscan-mcp"
+      "command": "secscan-mcp"
     }
   }
 }
 ```
 
-Use the path from `which secscan-mcp` after install.
-
-Then:
-
-1. **Cmd+Shift+P** → **Developer: Reload Window**
-2. **Cursor Settings → Tools & MCP** — `secscan` should show as connected (green)
-3. Open the project you want to scan
-4. In **Agent** chat, ask the agent to use the tools (see [examples](#example-prompts))
-
-Works for any folder you open in Cursor, not only this repository.
-
-### Option 2 — This repo only
-
-If you develop or test **secscan-mcp** itself, use the included [`.cursor/mcp.json`](.cursor/mcp.json) and run `make install-dev` so `${workspaceFolder}/.venv/bin/secscan-mcp` exists.
+**3. Verify** — ask your agent: *"Call `list_available_scanners` and scan_secrets on this project."*
 
 ## MCP tools
 
@@ -62,22 +55,17 @@ If you develop or test **secscan-mcp** itself, use the included [`.cursor/mcp.js
 | `scan_code` | SAST (semgrep, bandit) |
 | `scan_dependencies` | Vulnerable packages (osv-scanner) |
 | `scan_iac` | IaC misconfigurations (checkov) |
-| `scan_all` | All available scanners, one report |
+| `scan_all` | All available scanners, one unified report |
 | `explain_finding` | Remediation hints for a `rule_id` |
 
-Most tools accept `path` (directory to scan) and optional `severity_threshold` (`critical`, `high`, `medium`, `low`, `info`).
-
-## Example prompts
-
-- “Call `list_available_scanners` and tell me what’s installed.”
-- “Run `scan_secrets` on this project.”
-- “Run `scan_all` with severity_threshold high and summarize the findings.”
-- “Explain the rule `internal-api-key`.”
+Most scan tools accept `path` (directory to scan) and optional `severity_threshold` (`critical`, `high`, `medium`, `low`, `info`).
 
 ## Optional scanners
 
-| Tool | Category | Install (example) |
-|------|----------|-------------------|
+Install any of these to extend coverage. Missing CLIs are skipped — the server still runs.
+
+| Engine | Category | Install (example) |
+|--------|----------|-------------------|
 | gitleaks | secrets | `brew install gitleaks` |
 | semgrep | SAST | `pip install semgrep` |
 | bandit | SAST (Python) | `pip install bandit` |
@@ -86,15 +74,33 @@ Most tools accept `path` (directory to scan) and optional `severity_threshold` (
 
 After installing, run `list_available_scanners` again to confirm.
 
-## Troubleshooting
+## Example prompts
 
-| Problem | What to try |
-|---------|-------------|
-| `secscan` missing in MCP list | Reload window; confirm `mcp.json` path and JSON syntax |
-| Red / failed to start | Re-run `pip install .`; check `which secscan-mcp` matches config `command` |
-| Agent doesn’t call tools | Use **Agent** mode; name the tool explicitly in your message |
-| Only `custom` runs | Expected until optional CLIs are installed |
+- *"Call `list_available_scanners` and tell me what's installed."*
+- *"Run `scan_secrets` on this project."*
+- *"Run `scan_all` with severity_threshold high and summarize the findings."*
+- *"Explain the rule `internal-api-key`."*
+
+## Configuration
+
+Environment variables (optional):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SECSCAN_DEFAULT_TIMEOUT_SECONDS` | `300` | Per-engine scan timeout |
+| `SECSCAN_MAX_FINDINGS` | `500` | Max findings per report |
+
+Pass via MCP config `env` block — see [setup guide](docs/setup.md#environment-variables).
 
 ## Development
 
+```bash
+make install-dev   # editable install + dev tools
+make check         # lint + typecheck + test
+```
+
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [PLAN.md](PLAN.md).
+
+## License
+
+MIT

@@ -4,7 +4,7 @@
 
 1. Clone the repo and `cd` into the project root.
 2. Run `make install-dev` and activate `.venv`.
-3. Open the folder in Cursor; install recommended extensions when prompted (Ruff, Python, EditorConfig).
+3. Open the folder in your editor; install recommended extensions when prompted (Ruff, Python, EditorConfig).
 
 ## Commands
 

@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "secscan": {
+      "type": "stdio",
+      "command": "secscan-mcp"
+    }
+  }
+}

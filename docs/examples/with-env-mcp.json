@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "secscan": {
+      "command": "secscan-mcp",
+      "env": {
+        "SECSCAN_DEFAULT_TIMEOUT_SECONDS": "300",
+        "SECSCAN_MAX_FINDINGS": "500"
+      }
+    }
+  }
+}
