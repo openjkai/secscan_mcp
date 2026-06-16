@@ -22,7 +22,7 @@ else
 fi
 
 STEP=0
-TOTAL_STEPS=6
+TOTAL_STEPS=7
 
 usage() {
   cat <<'EOF'
@@ -43,7 +43,7 @@ Options:
 
 What it does:
   1. Resolve target version (explicit or patch/minor/major bump)
-  2. Verify CHANGELOG.md has a section for that version
+  2. Auto-update CHANGELOG.md if ## [X.Y.Z] is missing (from git commits since last tag)
   3. Bump __version__ in src/secscan_mcp/__init__.py
   4. Run make check && make build
   5. Commit, tag vX.Y.Z, push to origin
@@ -59,8 +59,7 @@ Examples:
   make release-patch
 
 Prerequisites:
-  - CHANGELOG.md section ## [X.Y.Z] for the target version
-  - Clean git working tree
+  - Clean git working tree (CHANGELOG.md may be auto-edited)
   - make, Python 3.11+, gh CLI (gh auth login)
   - PyPI trusted publishing (see docs/PUBLISHING.md)
 EOF
@@ -164,6 +163,95 @@ changelog_has_version() {
   grep -qE "^## \\[${ver}\\]" "$CHANGELOG"
 }
 
+changelog_section_heading() {
+  case "${1:-patch}" in
+    patch) printf 'Fixed' ;;
+    minor) printf 'Added' ;;
+    major) printf 'Changed' ;;
+    *) printf 'Changed' ;;
+  esac
+}
+
+latest_release_tag() {
+  git -C "$ROOT" describe --tags --match 'v*' --abbrev=0 2>/dev/null || true
+}
+
+collect_commit_bullets() {
+  local range tag
+  tag="$(latest_release_tag)"
+  if [[ -n "$tag" ]]; then
+    range="${tag}..HEAD"
+  else
+    range="HEAD"
+  fi
+
+  local count=0
+  while IFS= read -r subject; do
+    [[ -z "$subject" ]] && continue
+    [[ "$subject" =~ ^Release\ v ]] && continue
+    [[ "$subject" =~ ^Merge\  ]] && continue
+    printf -- '- %s\n' "$subject"
+    count=$((count + 1))
+    [[ "$count" -ge 25 ]] && break
+  done < <(git -C "$ROOT" log "$range" --pretty=format:'%s' --no-merges 2>/dev/null; echo)
+
+  if [[ "$count" -eq 0 ]]; then
+    printf -- '- Release %s\n' "$VERSION"
+  fi
+}
+
+ensure_changelog_link() {
+  local ver=$1
+  local link="[${ver}]: https://github.com/openjkai/secscan_mcp/releases/tag/v${ver}"
+  grep -qF "$link" "$CHANGELOG" && return
+  printf '\n%s\n' "$link" >>"$CHANGELOG"
+}
+
+update_changelog() {
+  if changelog_has_version "$VERSION"; then
+    log "CHANGELOG already has ## [${VERSION}]"
+    return
+  fi
+
+  local date heading body_file tmp
+  date="$(date +%Y-%m-%d)"
+  heading="$(changelog_section_heading "${BUMP_KIND:-patch}")"
+  body_file="$(mktemp)"
+  tmp="$(mktemp)"
+  collect_commit_bullets >"$body_file"
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    log "would add CHANGELOG section ## [${VERSION}] - ${date}"
+    log "release notes preview:"
+    sed 's/^/    /' "$body_file"
+    rm -f "$body_file" "$tmp"
+    return
+  fi
+
+  awk -v ver="$VERSION" -v date="$date" -v heading="$heading" -v body_file="$body_file" '
+    BEGIN {
+      while ((getline line < body_file) > 0) {
+        if (line != "") body = body line "\n"
+      }
+      close(body_file)
+      block = "## [" ver "] - " date "\n\n### " heading "\n\n" body "\n"
+      inserted = 0
+    }
+    /^## \[/ && !inserted {
+      print block
+      inserted = 1
+    }
+    { print }
+    END {
+      if (!inserted) print block
+    }
+  ' "$CHANGELOG" >"$tmp"
+  mv "$tmp" "$CHANGELOG"
+  ensure_changelog_link "$VERSION"
+  rm -f "$body_file"
+  ok "CHANGELOG updated for ${VERSION}"
+}
+
 extract_release_notes() {
   local ver=$1
   awk -v ver="$ver" '
@@ -212,7 +300,11 @@ preflight() {
   fi
 
   if ! changelog_has_version "$VERSION"; then
-    die "CHANGELOG.md has no section '## [$VERSION]' — add release notes first"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      log "CHANGELOG ## [${VERSION}] will be added in step 1"
+    else
+      die "CHANGELOG.md missing ## [$VERSION] — run update_changelog first"
+    fi
   fi
 
   local cur
@@ -287,6 +379,10 @@ github_release() {
   notes_file="$(mktemp)"
   extract_release_notes "$VERSION" >"$notes_file"
 
+  if [[ ! -s "$notes_file" && "$DRY_RUN" -eq 1 ]]; then
+    collect_commit_bullets >"$notes_file"
+  fi
+
   if [[ ! -s "$notes_file" ]]; then
     rm -f "$notes_file"
     die "no release notes found under ## [$VERSION] in CHANGELOG.md"
@@ -315,9 +411,12 @@ main() {
 
   printf '\n%ssecscan-mcp release%s\n' "$BOLD" "$NC"
 
+  step "Resolve version & changelog"
+  update_changelog
+
   step "Preflight checks"
   preflight
-  ok "changelog, git, and gh ready"
+  ok "git, gh, and tag checks passed"
 
   log "target v${VERSION} (current $(current_version))"
 

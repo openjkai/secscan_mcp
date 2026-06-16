@@ -45,8 +45,7 @@ Your GitHub Action failed with `invalid-publisher` because PyPI did not have a *
 **Option C — New patch release:**
 
 ```bash
-# Add ## [0.1.2] to CHANGELOG.md first
-make release-patch PYTHON=python3.11
+make release-patch PYTHON=python3.11   # CHANGELOG auto-updated from git log
 ```
 
 ### Step 4 — Verify
@@ -75,25 +74,22 @@ Trusted publishing uses OIDC — no long-lived `PYPI_API_TOKEN` in GitHub secret
 
 ## Release checklist
 
-1. Add a `## [X.Y.Z] - YYYY-MM-DD` section to [CHANGELOG.md](../CHANGELOG.md).
-2. Run the release script:
+1. Ensure PyPI trusted publisher + GitHub `pypi` environment are configured ([below](#just-registered-on-pypi-do-this-next)).
+2. Run the release script — **CHANGELOG is updated automatically** from commits since the last tag:
 
    ```bash
-   # Auto next version (recommended)
-   make release-patch          # 0.1.0 → 0.1.1
-   make release-minor          # 0.1.0 → 0.2.0
-   make release-major          # 0.1.0 → 1.0.0
+   make release-patch          # 0.1.1 → 0.1.2
+   make release-minor
+   make release-major
 
-   # Or explicit / generic bump
-   make release BUMP=patch
-   ./scripts/release.sh minor
-   make release VERSION=0.1.1
-
-   # Preview
+   # Preview without writing:
    make release-patch DRY_RUN=1
    ```
 
+   Optional: edit `CHANGELOG.md` after the script adds `## [X.Y.Z]` and before you confirm the push, if you want custom release notes.
+
    The script will:
+   - Insert `## [X.Y.Z]` into CHANGELOG (from `git log` since last tag)
    - Bump `src/secscan_mcp/__init__.py`
    - Run `make check` and `make build`
    - Commit, tag `vX.Y.Z`, push to origin
