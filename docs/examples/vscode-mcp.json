@@ -2,7 +2,8 @@
   "servers": {
     "secscan": {
       "type": "stdio",
-      "command": "secscan-mcp"
+      "command": "uvx",
+      "args": ["secscan-mcp"]
     }
   }
 }

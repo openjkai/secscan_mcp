@@ -2,7 +2,7 @@
 
 Configure **secscan-mcp** in your IDE or AI client. The server uses **stdio** transport — the same config pattern works everywhere; only the config file location differs.
 
-**Copy-paste examples:** [docs/examples/](examples/) (`cursor-mcp.json`, `vscode-mcp.json`, `claude-desktop-mcp.json`).
+**Copy-paste examples:** [docs/examples/](examples/) (`uvx-mcp.json`, `cursor-mcp.json`, `vscode-mcp.json`, `claude-desktop-mcp.json`).
 
 ## Prerequisites
 
@@ -19,7 +19,40 @@ If the command is not found, use the full path from `which secscan-mcp` in your 
 
 ## Install
 
-### From source (current)
+### PyPI (recommended)
+
+```bash
+pip install secscan-mcp
+```
+
+### uvx (no install)
+
+Requires [uv](https://docs.astral.sh/uv/). Ideal for MCP configs — always runs the latest compatible version:
+
+```bash
+uvx secscan-mcp
+```
+
+MCP config:
+
+```json
+{
+  "mcpServers": {
+    "secscan": {
+      "command": "uvx",
+      "args": ["secscan-mcp"]
+    }
+  }
+}
+```
+
+### From GitHub (no clone)
+
+```bash
+pip install git+https://github.com/openjkai/secscan_mcp.git
+```
+
+### From source (development)
 
 ```bash
 git clone https://github.com/openjkai/secscan_mcp.git
@@ -29,25 +62,24 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install .
 ```
 
-### From GitHub (no clone)
-
-```bash
-pip install git+https://github.com/openjkai/secscan_mcp.git
-```
-
-### From PyPI (coming in Phase 2)
-
-```bash
-pip install secscan-mcp
-# or, no install needed:
-uvx secscan-mcp
-```
-
 ---
 
 ## Config reference
 
-Most clients use this shape (`mcpServers`):
+**Recommended (uvx)** — no prior install, works on any machine with `uv`:
+
+```json
+{
+  "mcpServers": {
+    "secscan": {
+      "command": "uvx",
+      "args": ["secscan-mcp"]
+    }
+  }
+}
+```
+
+**After `pip install secscan-mcp`:**
 
 ```json
 {

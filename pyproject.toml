@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "secscan-mcp"
-version = "0.1.0"
+dynamic = ["version"]
 description = "MCP server for codebase security scanning (secrets, SAST, SCA, IaC)"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "secscan-mcp contributors" }]
-keywords = ["mcp", "security", "sast", "secrets", "scanner"]
+keywords = ["mcp", "security", "sast", "secrets", "scanner", "model-context-protocol"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -35,6 +35,7 @@ dev = [
   "ruff>=0.9",
   "mypy>=1.14",
   "types-PyYAML>=6.0",
+  "build>=1.0",
 ]
 
 [project.scripts]
@@ -45,6 +46,10 @@ Homepage = "https://github.com/openjkai/secscan_mcp"
 Documentation = "https://github.com/openjkai/secscan_mcp#readme"
 Repository = "https://github.com/openjkai/secscan_mcp"
 Issues = "https://github.com/openjkai/secscan_mcp/issues"
+Changelog = "https://github.com/openjkai/secscan_mcp/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/secscan_mcp/__init__.py"
 
 [tool.hatch.build]
 dev-mode-dirs = ["src"]
@@ -58,6 +63,7 @@ include = [
   "/tests",
   "/README.md",
   "/PLAN.md",
+  "/CHANGELOG.md",
   "/LICENSE",
 ]
 

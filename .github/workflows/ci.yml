@@ -35,3 +35,25 @@ jobs:
 
       - name: Lint, typecheck, and test
         run: make check
+
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: python -m pip install --upgrade pip build hatchling
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Verify bundled rules in wheel
+        run: |
+          unzip -l dist/*.whl | grep 'secscan_mcp/rules/custom_secrets.yaml'

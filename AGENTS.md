@@ -19,4 +19,4 @@ Python MCP server wrapping security scanners (`gitleaks`, `semgrep`, `osv-scanne
 
 ## Current phase
 
-**Phase 1 — Universal distribution** (nearly complete). Core engine + git history scanning done. Focus: PyPI publish (Phase 2), MCP polish. See [PLAN.md](PLAN.md).
+**Phase 2 — PyPI publish.** Release workflow and docs ready; create GitHub Release `v0.1.0` to publish (see [docs/PUBLISHING.md](docs/PUBLISHING.md)). Next: MCP polish (Phase 3).

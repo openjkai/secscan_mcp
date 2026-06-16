@@ -1,6 +1,7 @@
 # secscan-mcp
 
 [![CI](https://github.com/openjkai/secscan_mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/openjkai/secscan_mcp/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/secscan-mcp)](https://pypi.org/project/secscan-mcp/)
 
 A portable **MCP server** for security scanning — works with **any AI coding assistant** that supports the [Model Context Protocol](https://modelcontextprotocol.io): Cursor, VS Code, Claude Desktop, Windsurf, Zed, Continue, and more.
 
@@ -13,15 +14,26 @@ The built-in **custom** scanner works with no extra tools. Install optional CLIs
 **1. Install** (Python 3.11+):
 
 ```bash
-pip install git+https://github.com/openjkai/secscan_mcp.git
+pip install secscan-mcp
 ```
 
-Or from a local clone:
+Or run without installing (requires [uv](https://docs.astral.sh/uv/)):
+
+```bash
+uvx secscan-mcp
+```
+
+For MCP config with `uvx`, use `"command": "uvx"` and `"args": ["secscan-mcp"]` — see [setup guide](docs/setup.md).
+
+<details>
+<summary>Install from source</summary>
 
 ```bash
 git clone https://github.com/openjkai/secscan_mcp.git
 cd secscan_mcp && pip install .
 ```
+
+</details>
 
 **2. Add to your IDE** — pick your client:
 
@@ -40,11 +52,14 @@ Minimal config (works in Cursor, Claude Desktop, Windsurf):
 {
   "mcpServers": {
     "secscan": {
-      "command": "secscan-mcp"
+      "command": "uvx",
+      "args": ["secscan-mcp"]
     }
   }
 }
 ```
+
+If you installed with `pip install secscan-mcp`, you can use `"command": "secscan-mcp"` instead.
 
 **3. Verify** — ask your agent: *"Call `list_available_scanners` and scan_secrets on this project."*
 

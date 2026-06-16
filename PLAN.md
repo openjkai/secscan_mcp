@@ -59,7 +59,7 @@ normalize.py       ← Finding schema, severity, dedupe, redaction
 - [x] MCP server with 7 tools (stdio transport)
 - [x] Unit tests for normalize, paths, runner, custom engine
 
-### Phase 1 — Universal distribution (current)
+### Phase 1 — Universal distribution ✅
 
 Goal: any developer can install and configure in their IDE in under 2 minutes.
 
@@ -72,14 +72,14 @@ Goal: any developer can install and configure in their IDE in under 2 minutes.
 - [x] Git history secret scanning (`git_history` engine)
 - [x] Integration tests with `@pytest.mark.integration` marker
 
-### Phase 2 — PyPI publish
+### Phase 2 — PyPI publish (current)
 
 Goal: one-line install without cloning the repo.
 
-- [ ] Publish `secscan-mcp` to PyPI
-- [ ] Document `pip install secscan-mcp` and `uvx secscan-mcp`
-- [ ] GitHub Actions release workflow (tag → build → publish)
-- [ ] CHANGELOG.md and semver releases
+- [ ] Publish `secscan-mcp` to PyPI (create GitHub Release `v0.1.0` — see [docs/PUBLISHING.md](docs/PUBLISHING.md))
+- [x] Document `pip install secscan-mcp` and `uvx secscan-mcp`
+- [x] GitHub Actions release workflow (tag → build → publish)
+- [x] CHANGELOG.md and semver releases
 
 ### Phase 3 — MCP polish
 

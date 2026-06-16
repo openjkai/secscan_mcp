@@ -1,7 +1,8 @@
 {
   "mcpServers": {
     "secscan": {
-      "command": "secscan-mcp"
+      "command": "uvx",
+      "args": ["secscan-mcp"]
     }
   }
 }

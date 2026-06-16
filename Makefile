@@ -1,4 +1,4 @@
-.PHONY: help install install-dev sync lint format typecheck test check pre-commit clean
+.PHONY: help install install-dev sync lint format typecheck test test-integration check build pre-commit clean
 
 PYTHON ?= python3
 VENV ?= .venv
@@ -13,6 +13,8 @@ help:
 	@echo "  format       Ruff formatter (write)"
 	@echo "  typecheck    Mypy"
 	@echo "  test         Pytest"
+	@echo "  test-integration  Pytest optional CLI tests"
+	@echo "  build        Build sdist + wheel (dist/)"
 	@echo "  check        lint + typecheck + test"
 	@echo "  pre-commit   Run all pre-commit hooks"
 	@echo "  clean        Remove caches and build artifacts"
@@ -47,6 +49,10 @@ test:
 
 test-integration:
 	$(BIN)/pytest -m integration
+
+build: $(VENV)/bin/activate
+	$(BIN)/pip install -q build
+	$(BIN)/python -m build
 
 check: lint typecheck test
 
