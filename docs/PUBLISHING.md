@@ -2,7 +2,65 @@
 
 This guide is for maintainers releasing **secscan-mcp** to [PyPI](https://pypi.org/project/secscan-mcp/).
 
-## One-time PyPI setup
+## Just registered on PyPI? Do this next
+
+Your GitHub Action failed with `invalid-publisher` because PyPI did not have a **trusted publisher** yet. Fix it in this order:
+
+### Step 1 — Add trusted publisher on PyPI
+
+1. Log in at [pypi.org](https://pypi.org)
+2. Click your avatar → **Account settings**
+3. Left sidebar → **Publishing** (under “Security”)
+4. **Add a new pending publisher**
+5. Enter **exactly** (must match GitHub or publish will fail):
+
+| Field | Value |
+|-------|--------|
+| **PyPI Project Name** | `secscan-mcp` |
+| **Owner** | `openjkai` |
+| **Repository name** | `secscan_mcp` |
+| **Workflow name** | `release.yml` |
+| **Environment name** | `pypi` |
+
+6. Save. You do **not** need to create the project manually first — the first successful upload creates it.
+
+### Step 2 — Create GitHub environment
+
+1. Open https://github.com/openjkai/secscan_mcp/settings/environments
+2. **New environment** → name it **`pypi`** (lowercase, exact)
+3. Save (no secrets required for trusted publishing)
+
+### Step 3 — Publish
+
+**Option A — Re-run the failed release** (if `v0.1.1` already exists):
+
+1. https://github.com/openjkai/secscan_mcp/actions/workflows/release.yml
+2. Open the failed run for `v0.1.1`
+3. **Re-run all jobs**
+
+**Option B — Manual workflow** (after pushing latest `release.yml`):
+
+1. Actions → **Release** → **Run workflow** → Run
+
+**Option C — New patch release:**
+
+```bash
+# Add ## [0.1.2] to CHANGELOG.md first
+make release-patch PYTHON=python3.11
+```
+
+### Step 4 — Verify
+
+```bash
+pip install secscan-mcp
+secscan-mcp --help 2>/dev/null || which secscan-mcp
+```
+
+Or check https://pypi.org/project/secscan-mcp/
+
+---
+
+## One-time PyPI setup (reference)
 
 1. Create a PyPI account and register the project name `secscan-mcp` (first release creates it).
 2. On [pypi.org](https://pypi.org) → **Your projects** → **Publishing** → **Add a new pending publisher** (trusted publishing):
