@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. Version numbers follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-06-16
+
+### Fixed
+
+- Update release process and documentation: enhance CHANGELOG.md auto-update functionality in the release script, ensuring it reflects the latest commits. Streamline release steps by clarifying prerequisites and improving user feedback during the release process.
+- Enhance release workflow and documentation: add workflow_dispatch trigger to release.yml for manual execution, and expand PUBLISHING.md with detailed steps for setting up trusted publishing on PyPI, including environment creation and verification processes.
+
+
 ## [0.1.1] - 2026-06-16
 
 ### Added
@@ -28,3 +36,5 @@ First public release.
 
 [0.1.1]: https://github.com/openjkai/secscan_mcp/releases/tag/v0.1.1
 [0.1.0]: https://github.com/openjkai/secscan_mcp/releases/tag/v0.1.0
+
+[0.1.2]: https://github.com/openjkai/secscan_mcp/releases/tag/v0.1.2
