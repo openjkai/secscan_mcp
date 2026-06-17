@@ -21,9 +21,13 @@ If the command is not found, use the full path from `which secscan-mcp` in your 
 
 ### PyPI (recommended)
 
+Published at [pypi.org/project/secscan-mcp](https://pypi.org/project/secscan-mcp/) (requires **Python 3.11+**):
+
 ```bash
 pip install secscan-mcp
 ```
+
+If pip reports *"No matching distribution found"*, your default Python is below 3.11 — use `python3.11 -m pip install secscan-mcp` instead.
 
 ### uvx (no install)
 

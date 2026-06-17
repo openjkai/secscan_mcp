@@ -1,7 +1,8 @@
 # secscan-mcp
 
 [![CI](https://github.com/openjkai/secscan_mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/openjkai/secscan_mcp/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/secscan-mcp)](https://pypi.org/project/secscan-mcp/)
+[![PyPI](https://img.shields.io/pypi/v/secscan-mcp?label=PyPI)](https://pypi.org/project/secscan-mcp/)
+[![Python](https://img.shields.io/pypi/pyversions/secscan-mcp)](https://pypi.org/project/secscan-mcp/)
 
 A portable **MCP server** for security scanning — works with **any AI coding assistant** that supports the [Model Context Protocol](https://modelcontextprotocol.io): Cursor, VS Code, Claude Desktop, Windsurf, Zed, Continue, and more.
 
@@ -11,10 +12,14 @@ The built-in **custom** scanner works with no extra tools. Install optional CLIs
 
 ## Quick start
 
-**1. Install** (Python 3.11+):
+**Requires Python 3.11+.** If `pip install secscan-mcp` says *"No matching distribution found"*, your default `python3` is likely too old — use `python3.11 -m pip install secscan-mcp` or install Python 3.11+ first.
+
+**1. Install** from [PyPI](https://pypi.org/project/secscan-mcp/):
 
 ```bash
 pip install secscan-mcp
+# or explicitly:
+python3.11 -m pip install secscan-mcp
 ```
 
 Or run without installing (requires [uv](https://docs.astral.sh/uv/)):
