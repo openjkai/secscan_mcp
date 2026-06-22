@@ -39,7 +39,7 @@ def _run_engine(
     if not engine.is_installed():
         return engine.name, [], None
     try:
-        if isinstance(engine, (GitleaksEngine, GitHistoryEngine)):
+        if isinstance(engine, GitleaksEngine | GitHistoryEngine):
             include_history = bool(kwargs.get("include_git_history", False))
             findings = engine.run(root, timeout=timeout, include_git_history=include_history)
         else:

@@ -33,7 +33,7 @@ dev = [
   "pytest-asyncio>=0.24",
   "pytest-cov>=6.0",
   "ruff>=0.9",
-  "mypy>=1.14",
+  "mypy>=2.1",
   "types-PyYAML>=6.0",
   "build>=1.0",
 ]
@@ -113,7 +113,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["secscan_mcp.server"]
-disable_error_code = ["misc", "no-untyped-call", "untyped-decorator"]
+# MCP SDK decorators (@app.list_tools, @app.call_tool) are untyped (mcp.* uses ignore_missing_imports).
+disable_error_code = ["untyped-decorator", "no-untyped-call"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

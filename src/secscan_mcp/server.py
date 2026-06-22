@@ -12,6 +12,7 @@ from mcp.types import TextContent, Tool
 
 from secscan_mcp import __version__
 from secscan_mcp.paths import PathValidationError
+from secscan_mcp.rules.loader import rule_remediation_map
 from secscan_mcp.runner import (
     list_scanners,
     parse_severity_threshold,
@@ -23,12 +24,26 @@ from secscan_mcp.runner import (
     scan_secrets,
 )
 
-app = Server("secscan-mcp")
+app = Server(
+    "secscan-mcp",
+    version=__version__,
+    instructions=(
+        "Security scanning MCP server. Call list_available_scanners first to see what is "
+        "installed. Use scan_secrets with include_git_history=true before pushing or opening "
+        "a PR to catch secrets in git history — not just the working tree. Use scan_all for a "
+        "full pass; explain_finding for remediation hints on a rule_id from any finding."
+    ),
+)
 
-_RULE_HELP: dict[str, str] = {
-    "internal-api-key": "Remove hardcoded internal API keys; use env vars or a secret manager.",
-    "hardcoded-jwt": "JWTs in source are exposed; use auth provider tokens with short TTL.",
-    "generic-private-key-header": "Private keys in repos require rotation and removal from git history.",
+_SEVERITY_PROP = {
+    "type": "string",
+    "enum": ["critical", "high", "medium", "low", "info"],
+    "description": "Minimum severity to include in results (default: info — all severities).",
+}
+
+_PATH_PROP = {
+    "type": "string",
+    "description": "Absolute or relative path to the project directory to scan.",
 }
 
 
@@ -38,106 +53,111 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="scan_secrets",
             description=(
-                "Scan a directory for hardcoded secrets and credentials. "
-                "Set include_git_history to also scan past git commits for secrets "
-                "removed from the working tree (built-in git_history engine; gitleaks when installed)."
+                "Detect hardcoded secrets and credentials in a directory. "
+                "Runs the built-in custom scanner (no extra tools). "
+                "When include_git_history is true, also scans past git commits for secrets "
+                "removed from the working tree but still in history — recommended before push/PR. "
+                "Uses git_history (built-in) and gitleaks (when installed)."
             ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Absolute or relative directory path",
-                    },
+                    "path": _PATH_PROP,
                     "include_git_history": {
                         "type": "boolean",
                         "default": False,
                         "description": (
-                            "Scan git commit history for secrets (not just current files). "
-                            "Uses built-in git_history when git is available; also enables gitleaks history mode."
+                            "Scan git commit history, not just current files. "
+                            "Finds secrets deleted from source but still in old commits."
                         ),
                     },
-                    "severity_threshold": {
-                        "type": "string",
-                        "enum": ["critical", "high", "medium", "low", "info"],
-                        "description": "Minimum severity to include",
-                    },
+                    "severity_threshold": _SEVERITY_PROP,
                 },
                 "required": ["path"],
             },
         ),
         Tool(
             name="scan_code",
-            description="Run SAST scanners (semgrep, bandit) on a directory.",
+            description=(
+                "Static analysis (SAST) for code vulnerabilities and unsafe patterns. "
+                "Uses semgrep and bandit when installed; skips missing engines."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string"},
-                    "severity_threshold": {
-                        "type": "string",
-                        "enum": ["critical", "high", "medium", "low", "info"],
-                    },
+                    "path": _PATH_PROP,
+                    "severity_threshold": _SEVERITY_PROP,
                 },
                 "required": ["path"],
             },
         ),
         Tool(
             name="scan_dependencies",
-            description="Scan lockfiles for vulnerable dependencies (osv-scanner).",
+            description=(
+                "Scan lockfiles and manifests for known vulnerable dependencies (SCA). "
+                "Uses osv-scanner when installed."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string"},
-                    "severity_threshold": {
-                        "type": "string",
-                        "enum": ["critical", "high", "medium", "low", "info"],
-                    },
+                    "path": _PATH_PROP,
+                    "severity_threshold": _SEVERITY_PROP,
                 },
                 "required": ["path"],
             },
         ),
         Tool(
             name="scan_iac",
-            description="Scan infrastructure-as-code for misconfigurations (checkov).",
+            description=(
+                "Scan Terraform, CloudFormation, Kubernetes, and other IaC for "
+                "misconfigurations. Uses checkov when installed."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string"},
-                    "severity_threshold": {
-                        "type": "string",
-                        "enum": ["critical", "high", "medium", "low", "info"],
-                    },
+                    "path": _PATH_PROP,
+                    "severity_threshold": _SEVERITY_PROP,
                 },
                 "required": ["path"],
             },
         ),
         Tool(
             name="scan_all",
-            description="Run all available scanners and return a unified report.",
+            description=(
+                "Run every installed scanner (secrets, SAST, dependencies, IaC) and return "
+                "one unified, deduplicated report. Does not enable git history unless you "
+                "call scan_secrets separately with include_git_history."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string"},
-                    "severity_threshold": {
-                        "type": "string",
-                        "enum": ["critical", "high", "medium", "low", "info"],
-                    },
+                    "path": _PATH_PROP,
+                    "severity_threshold": _SEVERITY_PROP,
                 },
                 "required": ["path"],
             },
         ),
         Tool(
             name="list_available_scanners",
-            description="List scanners and whether each CLI is installed on this machine.",
+            description=(
+                "List all supported scanners and whether each engine CLI is installed. "
+                "Call this before scanning to know which tools will run."
+            ),
             inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
             name="explain_finding",
-            description="Return remediation guidance for a rule_id.",
+            description=(
+                "Return remediation guidance for a finding rule_id (from any scan result). "
+                "Covers built-in secret rules; other engines fall back to generic advice."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "rule_id": {"type": "string"},
+                    "rule_id": {
+                        "type": "string",
+                        "description": "The rule_id field from a finding in a scan report.",
+                    },
                 },
                 "required": ["rule_id"],
             },
@@ -155,7 +175,7 @@ def _handle_tool(name: str, arguments: dict[str, Any]) -> str:
 
     if name == "explain_finding":
         rule_id = str(arguments.get("rule_id", ""))
-        text = _RULE_HELP.get(
+        text = rule_remediation_map().get(
             rule_id,
             f"No built-in explanation for rule '{rule_id}'. Check the engine documentation for this rule.",
         )

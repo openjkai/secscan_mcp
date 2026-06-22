@@ -19,4 +19,4 @@ Python MCP server wrapping security scanners (`gitleaks`, `semgrep`, `osv-scanne
 
 ## Current phase
 
-**Phase 2 — PyPI publish.** Release workflow and docs ready; create GitHub Release `v0.1.0` to publish (see [docs/PUBLISHING.md](docs/PUBLISHING.md)). Next: MCP polish (Phase 3).
+**Phase 3 — MCP polish.** v0.1.2 is on PyPI. Next ship: **v0.1.3** (server instructions, richer tool docs, `explain_finding` from rules YAML). Release via `make release-patch PYTHON=python3.11` — see [docs/PUBLISHING.md](docs/PUBLISHING.md).

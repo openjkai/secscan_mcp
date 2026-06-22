@@ -25,3 +25,14 @@ def load_secret_rules() -> list[dict[str, Any]]:
         entry["pattern"] = re.compile(str(rule["pattern"]))
         loaded.append(entry)
     return loaded
+
+
+def rule_remediation_map() -> dict[str, str]:
+    """Map rule_id → remediation text from bundled secret rules."""
+    result: dict[str, str] = {}
+    for rule in load_secret_rules():
+        rule_id = rule.get("id")
+        remediation = rule.get("remediation")
+        if isinstance(rule_id, str) and isinstance(remediation, str):
+            result[rule_id] = remediation
+    return result

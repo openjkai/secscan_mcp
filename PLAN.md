@@ -40,7 +40,7 @@ Many credential leaks happen in **commits**, not just the current checkout. Deve
 MCP host (any IDE)
     │  stdio
     ▼
-server.py          ← MCP tools
+server.py          ← MCP tools + server instructions
     │
 runner.py          ← parallel runs, timeouts, path safety
     │
@@ -72,24 +72,27 @@ Goal: any developer can install and configure in their IDE in under 2 minutes.
 - [x] Git history secret scanning (`git_history` engine)
 - [x] Integration tests with `@pytest.mark.integration` marker
 
-### Phase 2 — PyPI publish (current)
+### Phase 2 — PyPI publish ✅
 
 Goal: one-line install without cloning the repo.
 
-- [ ] Publish `secscan-mcp` to PyPI (create GitHub Release `v0.1.0` — see [docs/PUBLISHING.md](docs/PUBLISHING.md))
+- [x] Publish `secscan-mcp` to PyPI ([pypi.org/project/secscan-mcp](https://pypi.org/project/secscan-mcp/)) — **v0.1.2** live
 - [x] Document `pip install secscan-mcp` and `uvx secscan-mcp`
 - [x] GitHub Actions release workflow (tag → build → publish)
-- [x] CHANGELOG.md and semver releases
+- [x] CHANGELOG.md and semver releases (`make release-patch|minor|major`)
+- [x] Auto-update CHANGELOG from git log in release script
+- [x] README Python 3.11+ install troubleshooting (pip “no matching distribution”)
 
-### Phase 3 — MCP polish
+### Phase 3 — MCP polish (current)
 
 Goal: agents use the tools correctly without hand-holding.
 
-- [ ] Rich tool descriptions and parameter docs
-- [ ] Server instructions for MCP hosts
-- [ ] Expand `explain_finding` rule coverage
+- [x] Rich tool descriptions and parameter docs
+- [x] Server instructions for MCP hosts
+- [x] `explain_finding` loads remediation from bundled rules YAML
 - [ ] Smoke-test in Cursor, VS Code, and Claude Desktop
-- [ ] Default `include_git_history: true` guidance for pre-push / pre-PR workflows
+- [ ] Expand `explain_finding` for semgrep/gitleaks rule IDs
+- [ ] Optional: `scan_all` accepts `include_git_history`
 
 ### Phase 4 — Community & discovery
 
@@ -99,6 +102,38 @@ Goal: become the default security MCP.
 - [ ] Submit to MCP registries and awesome lists
 - [ ] Optional VS Code manifest for "Install from manifest"
 - [ ] Optional Docker image for team deployments
+
+## Next release — v0.1.3 (patch)
+
+**Current version:** `0.1.2` (PyPI + GitHub Release)
+
+**Target:** patch release — MCP polish + docs shipped since v0.1.2.
+
+### Included in v0.1.3
+
+| Area | Change |
+|------|--------|
+| MCP server | Server instructions for hosts (when to use git history, tool order) |
+| MCP tools | Richer descriptions and parameter docs on all 7 tools |
+| explain_finding | Remediation loaded from `custom_secrets.yaml` (single source of truth) |
+| Docs | README PyPI badge, Python 3.11+ install note (already on main post-0.1.2) |
+
+### Release steps
+
+```bash
+# Preview
+make release-patch DRY_RUN=1 PYTHON=python3.11
+
+# Ship (auto CHANGELOG, bump, tag, PyPI)
+make release-patch PYTHON=python3.11
+```
+
+See [docs/PUBLISHING.md](docs/PUBLISHING.md).
+
+### After v0.1.3
+
+- Manual smoke-test in Cursor + Claude Desktop
+- v0.2.0 (minor): `scan_all` + git history, expanded rule help, SECURITY.md
 
 ## Non-goals (for now)
 
