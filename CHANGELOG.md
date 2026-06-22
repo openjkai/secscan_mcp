@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. Version numbers follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.3] - 2026-06-22
+
+### Fixed
+
+- Update AGENTS.md and PLAN.md for Phase 3: polish MCP server with new features, including server instructions and richer tool documentation. Introduce rule remediation mapping in loader.py and add tests for rule loading functionality.
+- Update README.md and setup.md: clarify Python 3.11+ requirement for installation, enhance installation instructions, and add PyPI badge for better visibility.
+
+
 ## [0.1.2] - 2026-06-16
 
 ### Fixed
@@ -38,3 +46,5 @@ First public release.
 [0.1.0]: https://github.com/openjkai/secscan_mcp/releases/tag/v0.1.0
 
 [0.1.2]: https://github.com/openjkai/secscan_mcp/releases/tag/v0.1.2
+
+[0.1.3]: https://github.com/openjkai/secscan_mcp/releases/tag/v0.1.3
